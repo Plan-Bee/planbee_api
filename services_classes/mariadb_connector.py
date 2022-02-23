@@ -1,6 +1,7 @@
 import mariadb
 import sys
 import os
+import json
 
 from dotenv import load_dotenv
 
@@ -23,12 +24,31 @@ class MariaDBConnector(object):
 
         self.cursor = conn.cursor()
 
-    def get_honeypi_data(self):
-        self.cursor.execute(
-            "SELECT broodroom_temperature,outdoor_temperature FROM honeypi_data",
-            ()
-        )
-        return self.cursor
+    def get_honeypi_data(self, start_date="", end_date=""):
+        if start_date != "" and end_date != "":
+            self.cursor.execute(
+                "SELECT * "
+                "FROM honeypi_data "
+                "WHERE timestamp BETWEEN ? AND ? "
+                "ORDER BY timestamp DESC "
+                "LIMIT 100 ",
+                (start_date, end_date)
+            )
+        else:
+            self.cursor.execute(
+                "SELECT * "
+                "FROM honeypi_data "
+                "ORDER BY timestamp DESC "
+                "LIMIT 100 ",
+                ()
+            )
+        row_headers = [x[0] for x in self.cursor.description]  # this will extract row headers
+        results = self.cursor.fetchall()
+        json_data = []
+        for result in results:
+            json_data.append(dict(zip(row_headers, result)))
+
+        return json_data
 
 
 def test():
