@@ -10,4 +10,7 @@ def get_honeypi_data(request):
     start_date = request.GET.get('start_date', '')
     end_date = request.GET.get('end_date', '')
 
-    return Response(mariadb_connector_obj.get_honeypi_data(start_date, end_date))
+    response = mariadb_connector_obj.get_honeypi_data(start_date, end_date)
+    mariadb_connector_obj.close_connection()
+
+    return Response(response)

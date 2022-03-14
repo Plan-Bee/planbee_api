@@ -11,7 +11,7 @@ load_dotenv()  # use .env as environmental variables from OS
 class MariaDBConnector(object):
     def __init__(self):
         try:
-            conn = mariadb.connect(
+            self.conn = mariadb.connect(
                 user=os.environ.get("MARIADB_USER"),
                 password=os.environ.get("MARIADB_PASSWORD"),
                 host=os.environ.get("MARIADB_HOST"),
@@ -22,7 +22,7 @@ class MariaDBConnector(object):
             print(f"Error connecting to MariaDB Platform: {e}")
             sys.exit(1)
 
-        self.cursor = conn.cursor()
+        self.cursor = self.conn.cursor()
 
     def get_honeypi_data(self, start_date="", end_date=""):
         if start_date != "" and end_date != "":
@@ -49,6 +49,9 @@ class MariaDBConnector(object):
             json_data.append(dict(zip(row_headers, result)))
 
         return json_data
+
+    def close_connection(self):
+        self.conn.close()
 
 
 def test():
